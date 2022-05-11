@@ -30,7 +30,7 @@ public class RequestProcessor extends Thread {
                 request.add(str);
             }
             System.out.println(request.toString());
-            processRequestType(request, clientWriteSource);
+            processRequestType(request, clientWriteSource, clientReadSource);
 
             clientWriteSource.close();
             clientReadSource.close();
@@ -41,7 +41,7 @@ public class RequestProcessor extends Thread {
         }
     }
 
-    public void processRequestType(List<String> request, DataOutputStream clientWriteSource){
+    public void processRequestType(List<String> request, DataOutputStream clientWriteSource, DataInputStream clientReadSource){
         String requestMethod = "";
         String str = request.get(0);
         for(int i = 0; i < str.length(); i++){
@@ -64,7 +64,7 @@ public class RequestProcessor extends Thread {
                 }
                 break;
             case "POST":
-                //processPOSTRequest(request);
+                processPOSTRequest(request, clientReadSource);
                 break;
             default:
                 try {
@@ -86,6 +86,23 @@ public class RequestProcessor extends Thread {
             dataSender.sendImage(fileName, clientWriteSource);
         }else{
             dataSender.sendFileName(fileName, clientWriteSource);
+        }
+    }
+
+    public void processPOSTRequest(List<String> request, DataInputStream payload){
+        try {
+            String []imageExtensionArray = {"png", "jpg", "jpeg"};
+            String []requestSplit = request.get(0).split(" ");
+            String fileName = requestSplit[1];
+            fileName = fileName.replaceAll("/", "");
+            String fileExtension = fileName.split("[.]")[1].toLowerCase();
+            if(Arrays.asList(imageExtensionArray).contains(fileExtension)) {
+                DataReceiver.receiveImage(fileName, payload);
+            }else {
+                DataReceiver.receiveFile(fileName, payload);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

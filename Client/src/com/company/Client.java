@@ -1,13 +1,10 @@
 package com.company;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 /**
@@ -41,7 +38,10 @@ public class Client{
                     }
                     break;
                 }
-
+                case "post":{
+                    makePostRequest(otherWriteSource, fileName, ip.toString());
+                    break;
+                }
                 default:
                     System.out.println("Unsupported Method");
                     break;
@@ -65,4 +65,28 @@ public class Client{
             e.printStackTrace();
         }
     }
+
+    public void makePostRequest(DataOutputStream writeRequest, String path, String host){
+        try {
+            Path filePath = Paths.get(path);
+            String fileName = filePath.getFileName().toString();
+            writeRequest.writeUTF("POST /" + fileName +" HTTP/1.0");
+            writeRequest.writeUTF("HOST: " + host);
+            writeRequest.writeUTF("TERMINATE");
+            if(isImageExtension(fileName)){
+                DataSender.postImage(path, writeRequest);
+            }else{
+                DataSender.postFile(path, writeRequest);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean isImageExtension(String fileName){
+        String []imageExtensionArray = {"png", "jpg", "jpeg"};
+        String fileExtension = fileName.split("[.]")[1].toLowerCase();
+        return Arrays.asList(imageExtensionArray).contains(fileExtension);
+    }
 }
+
