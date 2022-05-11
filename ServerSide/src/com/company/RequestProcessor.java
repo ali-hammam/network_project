@@ -1,7 +1,5 @@
 package com.company;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -15,6 +13,7 @@ public class RequestProcessor extends Thread {
     private Socket client;
     private DataInputStream clientReadSource;
     private  DataOutputStream clientWriteSource;
+    private DataSender dataSender = new DataSender();
 
     public RequestProcessor(Socket client, DataInputStream clientReadSource, DataOutputStream clientWriteSource){
         this.client = client;
@@ -24,13 +23,13 @@ public class RequestProcessor extends Thread {
 
     public void requestAcceptor(Socket client, DataInputStream clientReadSource, DataOutputStream clientWriteSource){
         try {
-            clientWriteSource.writeUTF("Server Handshaked now.");
             String str = "";
             List<String> request = new ArrayList<>();
             while(!str.equals("TERMINATE")) {
                 str = clientReadSource.readUTF();
                 request.add(str);
             }
+            System.out.println(request.toString());
             processRequestType(request, clientWriteSource);
 
             clientWriteSource.close();
@@ -55,6 +54,14 @@ public class RequestProcessor extends Thread {
         switch (requestMethod){
             case "GET":
                 processGETRequest(request, clientWriteSource);
+                try {
+                    if(dataSender.isGETError()){
+                        clientWriteSource.writeUTF("HTTP/1.0 404 " + getFileName(request, clientWriteSource)
+                                + " Not Found\r\n");
+                    }
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
                 break;
             case "POST":
                 //processPOSTRequest(request);
@@ -76,44 +83,17 @@ public class RequestProcessor extends Thread {
         fileName = fileName.replaceAll("/", "");
         String fileExtension = fileName.split("[.]")[1].toLowerCase();
         if(Arrays.asList(imageExtensionArray).contains(fileExtension)) {
-            sendImage(fileName, clientWriteSource);
+            dataSender.sendImage(fileName, clientWriteSource);
         }else{
-            sendFileName(fileName, clientWriteSource);
+            dataSender.sendFileName(fileName, clientWriteSource);
         }
     }
 
-    public void sendFileName(String fileName, DataOutputStream clientWriteSource){
-        try {
-            int bytes = 0;
-            File file = new File("C:\\Users\\HP\\IdeaProjects\\ServerSide\\src\\com\\company\\localStorage\\" + fileName);
-            if(file.exists() && !file.isDirectory()) {
-                FileInputStream fileInputStream = new FileInputStream(file);
-                byte[] buffer = new byte[4 * 1024];
-                while ((bytes = fileInputStream.read(buffer)) != -1) {
-                    clientWriteSource.write(buffer, 0, bytes);
-                    clientWriteSource.flush();
-                }
-                fileInputStream.close();
-            }
-        } catch (IOException e){
-            e.printStackTrace();
-        }
+    public String getFileName(List<String> request, DataOutputStream clientWriteSource){
+        String []requestSplit = request.get(0).split(" ");
+        String fileName = requestSplit[1];
+        return fileName.replaceAll("/", "");
     }
-
-    public void sendImage(String fileName, DataOutputStream clientWriteSource){
-        String extension = fileName.split("[.]")[1];
-        try {
-            int bytes = 0;
-            File file = new File("C:\\Users\\HP\\IdeaProjects\\ServerSide\\src\\com\\company\\localStorage\\" + fileName);
-            if(file.exists() && !file.isDirectory()) {
-                BufferedImage image = ImageIO.read(file);
-                ImageIO.write(image,extension,clientWriteSource);
-            }
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-    }
-
     public void run(){
         this.requestAcceptor(this.client, this.clientReadSource, this.clientWriteSource);
     }
