@@ -3,58 +3,46 @@ package com.company;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.io.File;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 
 /**
- * Created by HP on 5/8/2022.
+ * Created by HP on 5/11/2022.
  */
-public class Server {
-    private ServerSocket server = null;
-    private RequestProcessor request = null;
-    public Server(){
-        //listen to clients and return socket
+public class RequestProcessor extends Thread {
+    private Socket client;
+    private DataInputStream clientReadSource;
+    private  DataOutputStream clientWriteSource;
+
+    public RequestProcessor(Socket client, DataInputStream clientReadSource, DataOutputStream clientWriteSource){
+        this.client = client;
+        this.clientReadSource = clientReadSource;
+        this.clientWriteSource = clientWriteSource;
+    }
+
+    public void requestAcceptor(Socket client, DataInputStream clientReadSource, DataOutputStream clientWriteSource){
         try {
-
-            this.server = new ServerSocket(8000);
-            while(true){
-                Socket client = server.accept();
-                System.out.println("A new connection identified : " + client);
-
-
-                DataInputStream clientReadSource = new DataInputStream(client.getInputStream()); //it will read the data as string or int or any type as you want
-                DataOutputStream clientWriteSource = new DataOutputStream(client.getOutputStream());
-
-                System.out.println("Thread assigned");
-                Thread thread = new RequestProcessor(client, clientReadSource, clientWriteSource);
-                thread.start();
-                /*clientWriteSource.writeUTF("Server Handshaked now.");
-
-                String str = "";
-                List<String> request = new ArrayList<>();
-                while(!str.equals("TERMINATE")) {
-                    str = clientReadSource.readUTF();
-                    request.add(str);
-                }
-                processRequestType(request, clientWriteSource);
-
-                clientWriteSource.close();
-                clientReadSource.close();
-                client.close();*/
+            clientWriteSource.writeUTF("Server Handshaked now.");
+            String str = "";
+            List<String> request = new ArrayList<>();
+            while(!str.equals("TERMINATE")) {
+                str = clientReadSource.readUTF();
+                request.add(str);
             }
+            processRequestType(request, clientWriteSource);
 
+            clientWriteSource.close();
+            clientReadSource.close();
+            System.out.println("Client " + client + " closed connection...");
+            client.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    /*public void processRequestType(List<String> request, DataOutputStream clientWriteSource){
+    public void processRequestType(List<String> request, DataOutputStream clientWriteSource){
         String requestMethod = "";
         String str = request.get(0);
         for(int i = 0; i < str.length(); i++){
@@ -77,7 +65,7 @@ public class Server {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            break;
+                break;
         }
     }
 
@@ -124,6 +112,9 @@ public class Server {
         } catch (IOException e){
             e.printStackTrace();
         }
-    }*/
+    }
 
+    public void run(){
+        this.requestAcceptor(this.client, this.clientReadSource, this.clientWriteSource);
+    }
 }

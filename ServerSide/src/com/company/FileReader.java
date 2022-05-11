@@ -5,8 +5,8 @@ import java.util.Scanner;
 /**
  * Created by HP on 5/8/2022.
  */
-public class FileReader {
-    public static void read(String fileName){
+public class FileReader extends Thread{
+    /*public static void read(String fileName){
         try {
             File myObj = new File(fileName);
             Scanner myReader = new Scanner(myObj);
@@ -19,5 +19,8 @@ public class FileReader {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
+    }*/
+    public void run() {
+        System.out.println("This code is running in a thread");
     }
 }

@@ -12,7 +12,7 @@ import java.util.Arrays;
 /**
  * Created by HP on 5/8/2022.
  */
-public class Client {
+public class Client{
     public Client(String requestMethod, String fileName){
         try {
             String []imageExtensionArray = {"png", "jpg", "jpeg"};
