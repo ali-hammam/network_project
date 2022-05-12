@@ -1,20 +1,53 @@
 package com.company;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
 public class Main {
 
     public static void main(String[] args) {
         /*GET Requests*/
-	    /*ClientRequest request1 = new ClientRequest("get", "fig.PNG");
-        ClientRequest request2 = new ClientRequest("get", "ali.txt");
-        ClientRequest request3 = new ClientRequest("get", "hh.txt");
-        ClientRequest request4 = new ClientRequest("get", "hffh.txt");
-        request1.start();
-        request2.start();
-        request3.start();
-        request4.start();*/
+        Cache.clearCache(1);
+        boolean flag = true;
+        while (flag){
+            ClientRequest request = null;
+            System.out.println("WELCOME");
+            System.out.println("1. Make GET Request");
+            System.out.println("2. Make POST Request");
+            System.out.println("3. Exit\n");
+            Scanner input = new Scanner(System.in);
+            String x = input.nextLine();
+            switch (x){
+                case "1":{
+                    System.out.print("Enter The file You want to GET/ ");
+                    String fileName = input.next();
+                    request = new ClientRequest("get", fileName);
+                    request.start();
+                    break;
+                }
 
-	    /*POST Requests*/
-        ClientRequest request4 = new ClientRequest("post", "D:\\test.PNG");
-        request4.start();
+                case "2":{
+                    System.out.print("Enter The file You want to POST/ ");
+                    String fileName = input.next();
+                    request = new ClientRequest("post", fileName);
+                    request.start();
+                    break;
+                }
+
+                case "3":{
+                    flag = false;
+                    break;
+                }
+
+                default:{
+                    System.out.println("Enter A Correct Input");
+                    break;
+                }
+            }
+            Cache.clearCache(12000);
+        }
     }
+
 }

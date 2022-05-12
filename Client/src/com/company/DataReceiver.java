@@ -4,9 +4,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.*;
 
 /**
  * Created by HP on 5/11/2022.
@@ -32,4 +30,5 @@ public class DataReceiver {
         frame.pack();
         frame.setVisible(true);
     }
+
 }

@@ -23,17 +23,26 @@ public class Client{
             switch (requestMethod) {
                 case "get": {
                     String fileExtension = fileName.split("[.]")[1].toLowerCase();
-                    makeGetRequest(otherWriteSource, fileName, ip.toString());
-                    String str = otherReadSource.readUTF();
-
-                    if(str.split(" ")[1].equals("404")){
-                        System.out.println(str);
-                    }else {
-                        System.out.println(str);
+                    if(checkCache(fileName)) {
                         if (Arrays.asList(imageExtensionArray).contains(fileExtension)) {
-                            DataReceiver.receiveImage(fileName, otherReadSource);
+                            Cache.receiveImageFromCache(fileName);
                         } else {
-                            DataReceiver.receiveFile(fileName, otherReadSource);
+                            Cache.receiveFileFromCache(fileName);
+                        }
+                    }else{
+                        makeGetRequest(otherWriteSource, fileName, ip.toString());
+
+                        String str = otherReadSource.readUTF();
+
+                        if (str.split(" ")[1].equals("404")) {
+                            System.out.println(str);
+                        } else {
+                            System.out.println(str);
+                            if (Arrays.asList(imageExtensionArray).contains(fileExtension)) {
+                                DataReceiver.receiveImage(fileName, otherReadSource);
+                            } else {
+                                DataReceiver.receiveFile(fileName, otherReadSource);
+                            }
                         }
                     }
                     break;
@@ -87,6 +96,11 @@ public class Client{
         String []imageExtensionArray = {"png", "jpg", "jpeg"};
         String fileExtension = fileName.split("[.]")[1].toLowerCase();
         return Arrays.asList(imageExtensionArray).contains(fileExtension);
+    }
+
+    public boolean checkCache(String fileName){
+        File file = new File(fileName);
+        return file.exists() && !file.isDirectory();
     }
 }
 

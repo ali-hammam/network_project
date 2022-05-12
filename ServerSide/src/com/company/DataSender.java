@@ -15,7 +15,7 @@ public class DataSender {
     public void sendFileName(String fileName, DataOutputStream clientWriteSource){
         try {
             int bytes = 0;
-            File file = new File("C:\\Users\\HP\\IdeaProjects\\ServerSide\\src\\com\\company\\localStorage\\" + fileName);
+            File file = new File("D:\\network_project\\ServerSide\\src\\com\\company\\localStorage\\" + fileName);
             if(file.exists() && !file.isDirectory()) {
                 clientWriteSource.writeUTF("HTTP/1.0 200 OK.\r\n");
                 FileInputStream fileInputStream = new FileInputStream(file);
@@ -37,7 +37,7 @@ public class DataSender {
         String extension = fileName.split("[.]")[1];
         try {
             int bytes = 0;
-            File file = new File("C:\\Users\\HP\\IdeaProjects\\ServerSide\\src\\com\\company\\localStorage\\" + fileName);
+            File file = new File("D:\\network_project\\ServerSide\\src\\com\\company\\localStorage\\" + fileName);
             if(file.exists() && !file.isDirectory()) {
                 clientWriteSource.writeUTF("HTTP/1.0 200 OK.\r\n");
                 BufferedImage image = ImageIO.read(file);
