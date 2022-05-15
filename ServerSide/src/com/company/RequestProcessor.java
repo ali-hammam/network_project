@@ -41,17 +41,11 @@ public class RequestProcessor extends Thread {
                 if(setting.equals("Connection")){
                     this.isThreadAlive = true;
                     Server.clientIpThread.put(Server.getClientRemoteIp(client), this);
-                    //Server.clientIpThread.get(Server.getClientRemoteIp(client)).start();
                 }
                 request.add(str);
             }
             System.out.println(request.toString());
             processRequestType(request, this.clientWriteSource, this.clientReadSource);
-
-            /*clientWriteSource.close();
-            clientReadSource.close();
-            System.out.println("Client " + client + " closed connection...");
-            client.close();*/
         } catch (IOException e) {
             e.printStackTrace();
         }

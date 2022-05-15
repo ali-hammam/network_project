@@ -14,17 +14,7 @@ public class ClientRequest extends Thread{
         this.isPersistent = isPersistent;
     }
 
-    /*public ClientRequest(String methodType, String file, boolean isPersistent){
-        this.methodType = methodType;
-        this.file = file;
-        this.isPersistent = isPersistent;
-    }*/
-
     public void run(){
-        //if(isPersistent){
            new Client(this.methodType, this.file, this.isPersistent);
-        /*} else {
-            new Client(this.methodType, this.file);
-        }*/
     }
 }

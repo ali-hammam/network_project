@@ -68,61 +68,6 @@ public class Client{
         }
     }
 
-    /*public Client (String requestMethod, String fileName, boolean isPersistent){
-        try {
-            this.isPersistent = isPersistent;
-            String []imageExtensionArray = {"png", "jpg", "jpeg"};
-            InetAddress ip = InetAddress.getByName("localhost");
-            Socket other = new Socket(ip, 8000);
-
-            DataInputStream otherReadSource = new DataInputStream(other.getInputStream());
-            DataOutputStream otherWriteSource = new DataOutputStream(other.getOutputStream());
-
-            switch (requestMethod) {
-                case "get": {
-                    String fileExtension = fileName.split("[.]")[1].toLowerCase();
-                    if(checkCache(fileName)) {
-                        if (Arrays.asList(imageExtensionArray).contains(fileExtension)) {
-                            Cache.receiveImageFromCache(fileName);
-                        } else {
-                            Cache.receiveFileFromCache(fileName);
-                        }
-                    }else{
-                        makeGetRequest(otherWriteSource, fileName, ip.toString());
-
-                        String str = otherReadSource.readUTF();
-
-                        if (str.split(" ")[1].equals("404")) {
-                            System.out.println(str);
-                        } else {
-                            System.out.println(str);
-                            if (Arrays.asList(imageExtensionArray).contains(fileExtension)) {
-                                DataReceiver.receiveImage(fileName, otherReadSource);
-                            } else {
-                                DataReceiver.receiveFile(fileName, otherReadSource);
-                            }
-                        }
-                    }
-                    break;
-                }
-                case "post":{
-                    makePostRequest(otherWriteSource, fileName, ip.toString());
-                    break;
-                }
-                default:
-                    System.out.println("Unsupported Method");
-                    break;
-            }
-
-            otherReadSource.close();
-            otherWriteSource.close();
-            other.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
-
     public void makeGetRequest(DataOutputStream writeRequest, String fileName, String host){
         try {
             writeRequest.writeUTF("GET /" + fileName +" HTTP/1.0\\r\\n");
@@ -142,6 +87,9 @@ public class Client{
             String fileName = filePath.getFileName().toString();
             writeRequest.writeUTF("POST /" + fileName +" HTTP/1.0\\r\\n");
             writeRequest.writeUTF("HOST: " + host+"\\r\\n");
+            if(this.isPersistent){
+                writeRequest.writeUTF("Connection: Keep-Alive\\r\\n");
+            }
             writeRequest.writeUTF("TERMINATE");
             if(isImageExtension(fileName)){
                 DataSender.postImage(path, writeRequest);
