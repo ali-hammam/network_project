@@ -14,6 +14,7 @@ public class RequestProcessor extends Thread {
     private DataInputStream clientReadSource;
     private  DataOutputStream clientWriteSource;
     private DataSender dataSender = new DataSender();
+    private boolean isThreadAlive = false;
 
     public RequestProcessor(Socket client, DataInputStream clientReadSource, DataOutputStream clientWriteSource){
         this.client = client;
@@ -21,21 +22,36 @@ public class RequestProcessor extends Thread {
         this.clientWriteSource = clientWriteSource;
     }
 
-    public void requestAcceptor(Socket client, DataInputStream clientReadSource, DataOutputStream clientWriteSource){
+    public void setClientReadSource(DataInputStream clientReadSource) {
+        this.clientReadSource = clientReadSource;
+    }
+
+    public void setClientWriteSource(DataOutputStream clientWriteSource) {
+        this.clientWriteSource = clientWriteSource;
+    }
+
+    public void requestAcceptor(){
         try {
             String str = "";
             List<String> request = new ArrayList<>();
             while(!str.equals("TERMINATE")) {
-                str = clientReadSource.readUTF();
+                System.out.println(str);
+                str = this.clientReadSource.readUTF();
+                String setting = str.split(":")[0];
+                if(setting.equals("Connection")){
+                    this.isThreadAlive = true;
+                    Server.clientIpThread.put(Server.getClientRemoteIp(client), this);
+                    //Server.clientIpThread.get(Server.getClientRemoteIp(client)).start();
+                }
                 request.add(str);
             }
             System.out.println(request.toString());
-            processRequestType(request, clientWriteSource, clientReadSource);
+            processRequestType(request, this.clientWriteSource, this.clientReadSource);
 
-            clientWriteSource.close();
+            /*clientWriteSource.close();
             clientReadSource.close();
             System.out.println("Client " + client + " closed connection...");
-            client.close();
+            client.close();*/
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -57,7 +73,7 @@ public class RequestProcessor extends Thread {
                 try {
                     if(dataSender.isGETError()){
                         clientWriteSource.writeUTF("HTTP/1.0 404 " + getFileName(request, clientWriteSource)
-                                + " Not Found\r\n");
+                                + " Not Found\\r\\n");
                     }
                 }catch (IOException e){
                     e.printStackTrace();
@@ -74,6 +90,10 @@ public class RequestProcessor extends Thread {
                 }
                 break;
         }
+    }
+
+    public boolean isThreadAlive() {
+        return isThreadAlive;
     }
 
     public void processGETRequest(List<String> request, DataOutputStream clientWriteSource){
@@ -111,7 +131,29 @@ public class RequestProcessor extends Thread {
         String fileName = requestSplit[1];
         return fileName.replaceAll("/", "");
     }
+
+    @Override
+    public String toString() {
+        return client.toString();
+    }
+
+    public void setThreadAlive(boolean val){
+        this.isThreadAlive = val;
+    }
+
     public void run(){
-        this.requestAcceptor(this.client, this.clientReadSource, this.clientWriteSource);
+        try {
+            this.requestAcceptor();
+            if(isThreadAlive()) {
+                Thread.sleep(15000);
+                Server.clientIpThread.remove(client.getRemoteSocketAddress().toString().split(":")[0]);
+            }
+            this.clientWriteSource.close();
+            this.clientReadSource.close();
+            System.out.println("Client " + client + " closed connection...");
+            this.client.close();
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -17,7 +17,7 @@ public class DataSender {
             int bytes = 0;
             File file = new File("D:\\network_project\\ServerSide\\src\\com\\company\\localStorage\\" + fileName);
             if(file.exists() && !file.isDirectory()) {
-                clientWriteSource.writeUTF("HTTP/1.0 200 OK.\r\n");
+                clientWriteSource.writeUTF("HTTP/1.0 200 OK\\r\\n");
                 FileInputStream fileInputStream = new FileInputStream(file);
                 byte[] buffer = new byte[4 * 1024];
                 while ((bytes = fileInputStream.read(buffer)) != -1) {
@@ -39,7 +39,7 @@ public class DataSender {
             int bytes = 0;
             File file = new File("D:\\network_project\\ServerSide\\src\\com\\company\\localStorage\\" + fileName);
             if(file.exists() && !file.isDirectory()) {
-                clientWriteSource.writeUTF("HTTP/1.0 200 OK.\r\n");
+                clientWriteSource.writeUTF("HTTP/1.0 200 OK.\\r\\n");
                 BufferedImage image = ImageIO.read(file);
                 ImageIO.write(image,extension,clientWriteSource);
             }else{

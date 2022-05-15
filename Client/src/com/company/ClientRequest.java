@@ -6,13 +6,25 @@ package com.company;
 public class ClientRequest extends Thread{
     private String methodType;
     private String file;
+    private boolean isPersistent;
 
-    public ClientRequest(String methodType, String file){
+    public ClientRequest(String methodType, String file, boolean isPersistent){
         this.methodType = methodType;
         this.file = file;
+        this.isPersistent = isPersistent;
     }
 
+    /*public ClientRequest(String methodType, String file, boolean isPersistent){
+        this.methodType = methodType;
+        this.file = file;
+        this.isPersistent = isPersistent;
+    }*/
+
     public void run(){
-        new Client(this.methodType, this.file);
+        //if(isPersistent){
+           new Client(this.methodType, this.file, this.isPersistent);
+        /*} else {
+            new Client(this.methodType, this.file);
+        }*/
     }
 }
